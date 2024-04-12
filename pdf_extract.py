@@ -14,9 +14,17 @@ import pytesseract  # Для выполнения OCR, чтобы извлека
 
 import os   # Для удаления дополнительно созданных файлов
 
+from collections import Counter # Для подсчета часто используемого шрифта и размера текста
 
-TEMP_CROPPED_IMAGE_PATH = "Resources/Images/cropped_image.pdf"
-TEMP_PDF_IMAGE_PATH = "Resources/Images/PDF_image.png"
+from Elements import * # Собственные классы с элементами
+from Font import Font
+
+# Пути для временных файлов
+TEMP_PDF_IMAGE = "Resources/Images/cropped_image.pdf"
+TEMP_IMAGE = "Resources/Images/PDF_image.png"
+
+# Язык для GOOGLE TESSERACT OCR
+LANG = "rus+eng"
 
 
 # # # # # # # # # # # # # # # # # # #
@@ -24,25 +32,24 @@ TEMP_PDF_IMAGE_PATH = "Resources/Images/PDF_image.png"
 # # # # # # # # # # # # # # # # # # #
 
 def text_extraction(element):
-    # Извлекаем текст из вложенного текстового элемента
-    line_text = element.get_text()
+    # Извлекаем текст из элемента, предполагая, что он текстовый контейнер
+    line_text = element.get_text() if isinstance(element, LTTextContainer) else ""
     
-    # Находим форматы текста
-    # Инициализируем список со всеми форматами, встречающимися в строке текста
-    line_formats = []
+    # Инициализируем списки для хранения форматов текста
+    fonts, sizes = [], []
     for text_line in element:
         if isinstance(text_line, LTTextContainer):
-            # Итеративно обходим каждый символ в строке текста
             for character in text_line:
                 if isinstance(character, LTChar):
-                    # Добавляем к символу название и размер шрифта
-                    line_formats.append((character.fontname, round(character.size, 1)))
-                    break
-    # Находим уникальные размеры и названия шрифтов в строке
-    # format_per_line = list(set(line_formats))
+                    # Сохраняем имя и размер шрифта первого символа в строке и прекращаем цикл
+                    fonts.append(character.fontname)
+                    sizes.append(round(character.size, 1))
+                    break  # Прерываем цикл после получения шрифта
     
-    # Возвращаем кортеж с текстом в каждой строке вместе с его форматом
-    return (line_text, line_formats)
+    font = Font.get_default_font(fonts, sizes).fix_current_name()
+    
+    # Возвращаем текст и самый частый шрифт
+    return line_text, font
 
 
 # # # # # # # # # # # # # # # # # # # # #
@@ -50,28 +57,48 @@ def text_extraction(element):
 # # # # # # # # # # # # # # # # # # # # #
 
 # Извлекает указанную в параметрах таблицу из файла
-def extract_table(pdf_path, page_num, table_num):
+def extract_table(pdf_path, page_index, table_index):
     # Открываем файл PDF
     pdf = pdfplumber.open(pdf_path)
     # Находим исследуемую страницу
-    table_page = pdf.pages[page_num]
+    table_page = pdf.pages[page_index]
     # Извлекаем соответствующую таблицу
-    table = table_page.extract_tables()[table_num]
+    table = table_page.extract_tables()[table_index]
     return table
 
-# Преобразует таблицу в текстовый формат
-def table_converter(table):
-    table_string = ''
+# Функция для создания объекта Table из списка списков
+def table_to_object(table):
+    # Создаем новый объект Table
+    table_object = TableElement()
     # Итеративно обходим каждую строку в таблице
-    for row_num in range(len(table)):
-        row = table[row_num]
-        # Удаляем разрыв строки из текста с переносом
-        cleaned_row = [item.replace('\n', ' ') if item is not None and '\n' in item else 'None' if item is None else item for item in row]
-        # Преобразуем таблицу в строку
-        table_string+=('|'+'|'.join(cleaned_row)+'|'+'\n')
-    # Удаляем последний разрыв строки
-    table_string = table_string[:-1]
-    return table_string
+    for row in table:
+        # Добавляем строку в объект Table
+        table_object.add_row(row)
+    return table_object
+
+# Create a function to check if the element is in any tables present in the page
+def is_element_inside_any_table(element, page ,tables):
+    x0, y0up, x1, y1up = element.bbox
+    # Change the cordinates because the pdfminer counts from the botton to top of the page
+    y0 = page.bbox[3] - y1up
+    y1 = page.bbox[3] - y0up
+    for table in tables:
+        tx0, ty0, tx1, ty1 = table.bbox
+        if tx0 <= x0 <= x1 <= tx1 and ty0 <= y0 <= y1 <= ty1:
+            return True
+    return False
+
+# Function to find the table for a given element
+def find_table_for_element(element, page ,tables):
+    x0, y0up, x1, y1up = element.bbox
+    # Change the cordinates because the pdfminer counts from the botton to top of the page
+    y0 = page.bbox[3] - y1up
+    y1 = page.bbox[3] - y0up
+    for i, table in enumerate(tables):
+        tx0, ty0, tx1, ty1 = table.bbox
+        if tx0 <= x0 <= x1 <= tx1 and ty0 <= y0 <= y1 <= ty1:
+            return i  # Return the index of the table
+    return None  
 
 
 # # # # # # # # # # # # # # # # # # # # # # # 
@@ -92,37 +119,36 @@ def crop_image(element, pageObj):
     cropped_pdf_writer.add_page(pageObj)
 
     # Сохраняем обрезанный PDF в новый файл
-    with open(TEMP_CROPPED_IMAGE_PATH, 'wb') as cropped_pdf_file:
+    with open(TEMP_PDF_IMAGE, 'wb') as cropped_pdf_file:
         cropped_pdf_writer.write(cropped_pdf_file)
 
 # Функция для преобразования PDF в изображения
 def convert_to_images(input_file,):
     images = convert_from_path(input_file)
     image = images[0]
-    output_file = TEMP_PDF_IMAGE_PATH
+    output_file = TEMP_IMAGE
     image.save(output_file, "PNG")
 
 # Функция для считывания текста из изображений
 def image_to_text(image_path):
     img = Image.open(image_path)
     # Извлекаем текст из изображения
-    text = pytesseract.image_to_string(img, lang="rus+eng")
+    text = pytesseract.image_to_string(img, lang=LANG)
     return text
 
 
 def extract_all(path_to_pdf):
-    # # # # # # # # # # # # #
-    # # #  Подготовка   # # #
-    # # # # # # # # # # # # #
-
     # создаём объект файла PDF
     pdfFileObj = open(path_to_pdf, 'rb')
     # создаём объект считывателя PDF
     pdfReaded = PyPDF2.PdfReader(pdfFileObj)
 
     # Создаём словарь для извлечения текста из каждого изображения
-    text_per_page = []
-
+    content_per_page = []
+    
+    # Создаем переменную, которая будет хранить часто используемый шрифт в документе
+    default_font = Font()
+    fonts = []
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # #   Извлечение информации после разбиения файла на объекты классов    # #
@@ -130,119 +156,102 @@ def extract_all(path_to_pdf):
 
     # Цикл по страницам
     for pagenum, page in enumerate(extract_pages(path_to_pdf)):
-        # Инициализируем переменные, необходимые для извлечения текста со страницы
-        pageObj = pdfReaded.pages[pagenum]  # Объект с содержанием текущей страницы
-        page_text = []
-        line_format = []
-        text_from_images = []
-        text_from_tables = []
+        # Объект страницы
+        pageObj = pdfReaded.pages[pagenum]
+
         page_content = []
-        # Инициализируем количество исследованных таблиц
-        table_num = 0
-        first_element = True
-        table_extraction_flag = False
-        # Открываем файл pdf
+        extracted_tables = []
+        
+        # Количество исследуемых таблиц на старнице
+        table_in_page = -1
+        # Открытие pdf файла
         pdf = pdfplumber.open(path_to_pdf)
-        # Находим исследуемую страницу
+        # Текущая страница
         page_tables = pdf.pages[pagenum]
-        # Находим количество таблиц на странице
+        # Нахождение таблиц на странице
         tables = page_tables.find_tables()
+        
+        if len(tables) != 0:
+            table_in_page = 0
 
+        # Извлечение таблиц из страницы
+        for table_num in range(len(tables)):
+            # Извлеките информацию из таблицы
+            table = extract_table(path_to_pdf, pagenum, table_num)
+            # Добавление преобразованной таблицы в список
+            extracted_tables.append(table)
 
-        # Получаем все элементы
+        # Получение всех элементов на странице
         page_elements = [(element.y1, element) for element in page._objs]
-        # Сортируем все элементы по порядку нахождения на странице
+        # Сортировка всех элементов по мере их расположения на странице
         page_elements.sort(key=lambda a: a[0], reverse=True)
 
-        # Цикл по компонентам внутри страницы
+
+        # Цикл по компонентам на странице
         for i, component in enumerate(page_elements):
-            # Извлекаем положение верхнего края элемента в PDF
-            pos = component[0]
-            # Извлекаем элемент структуры страницы
+            # Извлечение элемента макета страницы
             element = component[1]
-            
-            # Проверяем, является ли элемент текстовым
-            if isinstance(element, LTTextContainer):
-                # Проверяем, находится ли текст в таблице
-                if table_extraction_flag == False:
-                    # Используем функцию извлечения текста и формата для каждого текстового элемента
-                    (line_text, format_per_line) = text_extraction(element)
-                    # Добавляем текст каждой строки к тексту страницы
-                    page_text.append(line_text)
-                    # Добавляем формат каждой строки, содержащей текст
-                    line_format.append(format_per_line)
-                    page_content.append(line_text)
-                else:
-                    # Пропускаем текст, находящийся в таблице
-                    pass
 
-            # Проверяем элементы на наличие изображений
-            if isinstance(element, LTFigure):
-                # Вырезаем изображение из PDF
-                crop_image(element, pageObj)
-                # Преобразуем обрезанный pdf в изображение
-                convert_to_images(TEMP_CROPPED_IMAGE_PATH)
-                # Извлекаем текст из изображения
-                image_text = image_to_text(TEMP_PDF_IMAGE_PATH)
-                text_from_images.append(image_text)
-                page_content.append(image_text)
-                # Добавляем условное обозначение в списки текста и формата
-                page_text.append('image')
-                line_format.append('image')
+            # Проверка элемента на наличие таблиц
+            if table_in_page == -1:
+                pass
+            else:
+                if is_element_inside_any_table(element, page, tables):
+                    table_found = find_table_for_element(element,page ,tables)
+                    if table_found == table_in_page and table_found != None:   
+                        table = TableElement(extracted_tables[table_in_page])
+                         
+                        page_content.append(table)
+                        table_in_page += 1
+                    # Pass this iteration because the content of this element was extracted from the tables
+                    continue
 
-            lower_side, upper_side = 0, 0
-            # Проверяем элементы на наличие таблиц
-            if isinstance(element, LTRect):
-                # Если первый прямоугольный элемент
-                if first_element == True and (table_num + 1) <= len(tables):
-                    # Находим ограничивающий прямоугольник таблицы
-                    lower_side = page.bbox[3] - tables[table_num].bbox[3]
-                    upper_side = element.y1 
-                    # Извлекаем информацию из таблицы
-                    table = extract_table(path_to_pdf, pagenum, table_num)
-                    # Преобразуем информацию таблицы в формат структурированной строки
-                    table_string = table_converter(table)
-                    # Добавляем строку таблицы в список
-                    text_from_tables.append(table_string)
-                    page_content.append(table_string)
-                    # Устанавливаем флаг True, чтобы избежать повторения содержимого
-                    table_extraction_flag = True
-                    # Преобразуем в другой элемент
-                    first_element = False
-                    # Добавляем условное обозначение в списки текста и формата
-                    page_text.append('table')
-                    line_format.append('table')
+            if not is_element_inside_any_table(element, page, tables):
 
-                # Проверяем, извлекли ли мы уже таблицы из этой страницы
-                if element.y0 >= lower_side and element.y1 <= upper_side:
-                    pass
-                elif not isinstance(page_elements[i + 1][1], LTRect):
-                    table_extraction_flag = False
-                    first_element = True
-                    table_num+=1
+                # Check if the element is text element
+                if isinstance(element, LTTextContainer):
+                    # Use the function to extract the text and format for each text element
+                    line_text, font = text_extraction(element)
+                    fonts.append(font)
+                    
+                    text_element = TextElement(line_text, font)
+
+                    # Добавляем в содержание страницы текстовый объект
+                    page_content.append(text_element)
 
 
-        # Добавляем словарь к другим словарям, каждый элемент это номер страницы
-        text_per_page.append({
-            "page_text": page_text,
-            "line_format": line_format,
-            "text_from_images": text_from_images,
-            "text_from_tables": text_from_tables,
-            "page_content": page_content
-            })
+                # Check the elements for images
+                if isinstance(element, LTFigure):
+                    # Crop the image from PDF
+                    crop_image(element, pageObj)
+                    # Convert the croped pdf to image
+                    convert_to_images(TEMP_PDF_IMAGE)
+                    # Extract the text from image
+                    image_text = image_to_text(TEMP_IMAGE)
+
+                    if (len(fonts) > 2):
+                        default_font = Font.get_default_font(fonts)
+                        font = default_font
+                    elif fonts:
+                        font = fonts[-1]
+                    else:
+                        font = Font()
+                
+                    image_element = ImageElement(image_text, font)
+                    page_content.append(image_element)
+
+
+        # Добавляем элементы страницы в общий список
+        content_per_page.append(page_content)
 
 
     # Закрываем объект файла pdf
     pdfFileObj.close()
 
-    
     # Удаляем созданные дополнительные файлы
-    
-    if os.path.exists(TEMP_CROPPED_IMAGE_PATH):
-        os.remove(TEMP_CROPPED_IMAGE_PATH)
-    if os.path.exists(TEMP_PDF_IMAGE_PATH):
-        os.remove(TEMP_PDF_IMAGE_PATH)
+    if os.path.exists(TEMP_PDF_IMAGE):
+        os.remove(TEMP_PDF_IMAGE)
+    if os.path.exists(TEMP_IMAGE):
+        os.remove(TEMP_IMAGE)
 
-    # Удаляем содержимое страницы
-    # result = ''.join(text_per_page['Page_0'][4])
-    return text_per_page
+    return content_per_page
