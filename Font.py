@@ -61,15 +61,20 @@ class Font:
     @dispatch(list, list)
     @staticmethod
     def get_default_font(fonts, sizes):
-        # Подсчитываем встречаемость каждого шрифта и размера
-        name_counter = Counter(fonts)
-        size_counter = Counter(sizes)
+        font = Font()
+        if (fonts):
+            # Подсчитываем встречаемость каждого шрифта и размера
+            name_counter = Counter(fonts)
+            # Находим самый частый шрифт и размер
+            most_common_name = name_counter.most_common(1)[0][0]
+            font.set_name(most_common_name)
+            
+        if (sizes):
+            size_counter = Counter(sizes)
+            most_common_size = size_counter.most_common(1)[0][0]
+            font.set_size(most_common_size)
 
-        # Находим самый частый шрифт и размер
-        most_common_name = name_counter.most_common(1)[0][0]
-        most_common_size = size_counter.most_common(1)[0][0]
-
-        return Font(most_common_name, most_common_size)
+        return font
     
     @dispatch(list)
     @staticmethod
