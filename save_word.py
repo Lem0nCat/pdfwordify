@@ -11,11 +11,13 @@ def write_to_word_v2(content_per_page, word_path):
 
     # Инициализация до цикла, для того, чтобы использовался прошлый шрифт
     font = Font()
+    fonts = []
     # Цикл по страницам
     for page in content_per_page:
         # Цикл по элементам
         for element in page:
-            if element and isinstance(element, TextElement):
+            # Если элемент существует и он является либо текстовым, либо изображением
+            if element and (isinstance(element, TextElement) or isinstance(element, ImageElement)):
                 # Проверка на пустое содержание текста
                 if (element.text.lower().strip() != ""):
                     # Создаем элемент параграфа
@@ -31,6 +33,28 @@ def write_to_word_v2(content_per_page, word_path):
                         run.font.size = Pt(font.size)
                         run.font.bold = font.bold
                         run.font.italic = font.italic
+                        
+                        fonts.append(font)
+                        
+            # Если элемент существует и он является табличным
+            elif element and isinstance(element, TableElement):
+                # Добавляем пустую таблицу 
+                table = doc.add_table(rows=element.num_rows, cols=element.num_cols)
+                
+                # добавляем данные к существующей таблице
+                for i, row in enumerate(element.data):
+                    # Получаем ячейки строки в таблице
+                    row_cells = table.rows[i].cells
+                    for j, item in enumerate(row):
+                        paragraph = row_cells[j].paragraphs[0]
+                        run = paragraph.add_run(item)
+                        
+                        # Меняем стили текста
+                        if (len(fonts) > 2):
+                            font = Font.get_default_font(fonts)
+                                                  
+                        run.font.name = font.name
+                        run.font.size = Pt(font.size)
                     
 
     doc.save(word_path)
