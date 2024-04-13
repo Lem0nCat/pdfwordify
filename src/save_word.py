@@ -1,12 +1,12 @@
 from docx import Document
 from docx.shared import Pt
 
-from Font import Font
-from Elements import *
+from Classes.Font import Font
+from Classes.Elements import *
 
 
 # Функция, которая записывает текст в файл Word
-def write_to_word_v2(content_per_page, word_path):
+def write_to_word(content_per_page, word_path):
     doc = Document()    # Создаем документ
 
     # Инициализация до цикла, для того, чтобы использовался прошлый шрифт

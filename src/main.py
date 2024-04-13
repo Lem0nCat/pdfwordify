@@ -1,12 +1,10 @@
 from docx import Document
 
-from pdf_extract import extract_all
-from save_word import write_to_word_v2
+from src.pdf_extract import extract_all
+from src.save_word import write_to_word
 
 
-# export TESSDATA_PREFIX=/usr/share/tesseract/5/tessdata
-
-FILE_NAME = "Privacy policy"
+FILE_NAME = "big-table"
 PDF_PATH = f"Resources/PDF_files/{FILE_NAME}.pdf"
 WORD_PATH = f"Resources/word_files/{FILE_NAME}.docx"
 
@@ -21,8 +19,9 @@ def get_tree(pages):
             print()
         print()
 
-content_per_page = extract_all(PDF_PATH)
-write_to_word_v2(content_per_page, WORD_PATH)
-# get_tree(content_per_page)
-# print(content_per_page[0][7])
+def main():
+    content_per_page = extract_all(PDF_PATH)
+    write_to_word(content_per_page, WORD_PATH)
+    # get_tree(content_per_page)
+    # print(content_per_page[0][7])
 
