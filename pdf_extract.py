@@ -33,9 +33,23 @@ LANG = "rus+eng"
 
 def text_extraction(element):
     # Извлекаем текст из элемента, предполагая, что он текстовый контейнер
-    line_text = element.get_text() if isinstance(element, LTTextContainer) else ""
+    line_texts = element.get_text().split('\n') if isinstance(element, LTTextContainer) else [""]
     
-    # Инициализируем списки для хранения форматов текста
+    # Очищаем текст, удаляя ненужные переносы строк внутри абзацев
+    cleaned_texts = []
+    for i, line in enumerate(line_texts):
+        if (i < len(line_texts) - 1):
+            next_line = line_texts[i + 1].strip()
+            if (next_line and next_line[0].isalpha()):
+                cleaned_texts.append(line)
+            else:
+                cleaned_texts.append(line + '\n')
+        else:
+            pass
+    
+    cleaned_text = ''.join(cleaned_texts)
+    
+    # Сбор информации о шрифтах
     fonts, sizes = [], []
     for text_line in element:
         if isinstance(text_line, LTTextContainer):
@@ -49,7 +63,7 @@ def text_extraction(element):
     font = Font.get_default_font(fonts, sizes).fix_current_name()
     
     # Возвращаем текст и самый частый шрифт
-    return line_text, font
+    return cleaned_text, font
 
 
 # # # # # # # # # # # # # # # # # # # # #
@@ -65,16 +79,6 @@ def extract_table(pdf_path, page_index, table_index):
     # Извлекаем соответствующую таблицу
     table = table_page.extract_tables()[table_index]
     return table
-
-# Функция для создания объекта Table из списка списков
-def table_to_object(table):
-    # Создаем новый объект Table
-    table_object = TableElement()
-    # Итеративно обходим каждую строку в таблице
-    for row in table:
-        # Добавляем строку в объект Table
-        table_object.add_row(row)
-    return table_object
 
 # Create a function to check if the element is in any tables present in the page
 def is_element_inside_any_table(element, page ,tables):
@@ -137,6 +141,10 @@ def image_to_text(image_path):
     return text
 
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# #   Извлечение информации после разбиения файла на объекты классов    # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    
 def extract_all(path_to_pdf):
     # создаём объект файла PDF
     pdfFileObj = open(path_to_pdf, 'rb')
@@ -149,10 +157,6 @@ def extract_all(path_to_pdf):
     # Создаем переменную, которая будет хранить часто используемый шрифт в документе
     default_font = Font()
     fonts = []
-
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    # #   Извлечение информации после разбиения файла на объекты классов    # #
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     # Цикл по страницам
     for pagenum, page in enumerate(extract_pages(path_to_pdf)):
