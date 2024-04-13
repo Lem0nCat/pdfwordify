@@ -26,9 +26,10 @@ PDF Extractor — это инструмент для извлечения тек
    cd PDF_extractor
    ```
 2. Установить зависимости:
-```bash pip install -r requirements.txt```
-3. Установить Google tesseract OCR:
-   `https://github.com/tesseract-ocr/tesseract`
+```bash
+pip install -r requirements.txt
+```
+4. Установить [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract):
 
 ## Использование
 
