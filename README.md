@@ -23,7 +23,8 @@ PDF Extractor — это инструмент для извлечения тек
 1. Клонировать репозиторий:
    ```bash
    git clone https://github.com/Lem0nCat/PDF_extractor.git
-   cd PDF_extractor```
+   cd PDF_extractor
+   ```
 2. Установить зависимости:
 ```bash pip install -r requirements.txt```
 3. Установить Google tesseract OCR:
@@ -34,9 +35,9 @@ PDF Extractor — это инструмент для извлечения тек
 1. Перед началом укажите путь к языковым файлам Tesseract OCR в файле `Tools/config.py`. Если хотите, чтобы использовалась директория по умолчанию, то оставьте строку пустой.
 2. Для запуска программы выполните:
   ```bash
-  chmod +x run_script.py
-  ./run_script.py
-```
+   chmod +x run_script.py
+   ./run_script.py
+   ```
 
 ## Конфигурация
 
