@@ -25,11 +25,11 @@ PDF Extractor — это инструмент для извлечения тек
    git clone https://github.com/Lem0nCat/PDF_extractor.git
    ```
 2. Перейти в директорию с установленным репозиторием.
-3. Установить зависимости из файла:
+3. Установить [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract):
+4. Установить зависимости из файла:
    ```bash
    pip install -r requirements.txt
    ```
-4. Установить [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract):
 
 ## Использование
 
