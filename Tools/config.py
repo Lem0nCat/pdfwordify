@@ -8,6 +8,13 @@ TESSDATA_PATH = '/usr/share/tesseract/5/tessdata'
 TEMP_PDF_IMAGE = "Resources/Images/cropped_image.pdf"
 TEMP_IMAGE = "Resources/Images/PDF_image.png"
 
+# Название файла
+FILE_NAME = "test"
+
+# Пути для PDF и Word файла
+PDF_PATH = f"Resources/PDF_files/{FILE_NAME}.pdf"
+WORD_PATH = f"Resources/word_files/{FILE_NAME}.docx"
+
 # Настройки распознавания таблиц для pdfplumber
 TABLE_SETTINGS = {
     "vertical_strategy": "lines",
