@@ -58,7 +58,7 @@ def write_to_word(content_per_page, word_path):
                             font = Font.get_default_font(fonts)
                                                   
                         run.font.name = font.name
-                        run.font.size = Pt(font.size)
+                        run.font.size = Pt(font.size) if font.size <= 10 else Pt(10.0)
                     
     # Проверка на существование директории
     if not os.path.exists(WORD_FILES_PATH):
