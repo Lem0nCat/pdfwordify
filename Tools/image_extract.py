@@ -6,7 +6,9 @@ from pdf2image import convert_from_path
 
 import pytesseract  # Для выполнения OCR, чтобы извлекать тексты из изображений
 
-from .config import TEMP_IMAGE, TEMP_PDF_IMAGE, LANG
+from .config import IMAGES_PATH, TEMP_IMAGE, TEMP_PDF_IMAGE, LANG
+
+import os
 
 
 # # # # # # # # # # # # # # # # # # # # # # # 
@@ -25,6 +27,10 @@ def crop_image(element, pageObj):
     # Сохраняем обрезанную страницу в новый PDF
     cropped_pdf_writer = PyPDF2.PdfWriter()
     cropped_pdf_writer.add_page(pageObj)
+
+    # Проверка на существование директории
+    if not os.path.exists(IMAGES_PATH):
+        os.makedirs(IMAGES_PATH)
 
     # Сохраняем обрезанный PDF в новый файл
     with open(TEMP_PDF_IMAGE, 'wb') as cropped_pdf_file:

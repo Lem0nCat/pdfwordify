@@ -1,8 +1,12 @@
 from docx import Document
 from docx.shared import Pt
 
+import os
+
 from Classes.Font import Font
 from Classes.Elements import *
+
+from Tools.config import WORD_FILES_PATH
 
 
 # Функция, которая записывает текст в файл Word
@@ -56,6 +60,9 @@ def write_to_word(content_per_page, word_path):
                         run.font.name = font.name
                         run.font.size = Pt(font.size)
                     
-
+    # Проверка на существование директории
+    if not os.path.exists(WORD_FILES_PATH):
+        os.makedirs(WORD_FILES_PATH)
+        
     doc.save(word_path)
     print(f"Документ успешно сохранен ({word_path})")

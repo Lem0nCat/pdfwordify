@@ -5,15 +5,18 @@ LANG = "rus+eng"
 TESSDATA_PATH = '/usr/share/tesseract/5/tessdata'
 
 # Пути для временных файлов
-TEMP_PDF_IMAGE = "Resources/Images/cropped_image.pdf"
-TEMP_IMAGE = "Resources/Images/PDF_image.png"
+IMAGES_PATH = "Resources/Images"
+TEMP_PDF_IMAGE = f"{IMAGES_PATH}/cropped_image.pdf"
+TEMP_IMAGE = f"{IMAGES_PATH}/PDF_image.png"
 
 # Название файла
 FILE_NAME = "test"
 
 # Пути для PDF и Word файла
 PDF_PATH = f"Resources/PDF_files/{FILE_NAME}.pdf"
-WORD_PATH = f"Resources/word_files/{FILE_NAME}.docx"
+
+WORD_FILES_PATH = "Resources/word_files"
+WORD_PATH = f"{WORD_FILES_PATH}/{FILE_NAME}.docx"
 
 # Настройки распознавания таблиц для pdfplumber
 TABLE_SETTINGS = {
