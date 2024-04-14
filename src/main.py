@@ -1,12 +1,7 @@
-from docx import Document
-
 from src.pdf_extract import extract_all
 from src.save_word import write_to_word
 
-
-FILE_NAME = "big-table"
-PDF_PATH = f"Resources/PDF_files/{FILE_NAME}.pdf"
-WORD_PATH = f"Resources/word_files/{FILE_NAME}.docx"
+from Tools.config import PDF_PATH, WORD_PATH
 
 def get_tree(pages):
     for i, page in enumerate(pages):
