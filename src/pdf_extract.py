@@ -18,6 +18,14 @@ from Tools.text_extract import *
 from Tools.image_extract import *
 
 
+def is_landscape_orientation(page_object):
+    width = page_object.mediabox.width
+    height = page_object.mediabox.height
+    
+    if width > height:
+        return True
+    return False
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # #   Извлечение информации после разбиения файла на объекты классов    # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -39,7 +47,7 @@ def extract_all(path_to_pdf):
     for pagenum, page in enumerate(extract_pages(path_to_pdf)):
         # Объект страницы
         pageObj = pdfReaded.pages[pagenum]
-
+        
         page_content = []
         extracted_tables = []
         
@@ -88,7 +96,6 @@ def extract_all(path_to_pdf):
                     continue
 
             if not is_element_inside_any_table(element, page, tables):
-
                 # Check if the element is text element
                 if isinstance(element, LTTextContainer):
                     # Use the function to extract the text and format for each text element
@@ -123,7 +130,10 @@ def extract_all(path_to_pdf):
 
 
         # Добавляем элементы страницы в общий список
-        content_per_page.append(page_content)
+        content_per_page.append({
+            "page_content": page_content,
+            "landscape_orientation": is_landscape_orientation(pageObj)
+        })
 
 
     # Закрываем объект файла pdf

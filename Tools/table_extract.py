@@ -18,7 +18,7 @@ def extract_table(pdf_path, page_index, table_index):
     return table
 
 # Create a function to check if the element is in any tables present in the page
-def is_element_inside_any_table(element, page ,tables):
+def is_element_inside_any_table(element, page, tables):
     x0, y0up, x1, y1up = element.bbox
     # Change the cordinates because the pdfminer counts from the botton to top of the page
     y0 = page.bbox[3] - y1up
@@ -30,7 +30,7 @@ def is_element_inside_any_table(element, page ,tables):
     return False
 
 # Function to find the table for a given element
-def find_table_for_element(element, page ,tables):
+def find_table_for_element(element, page, tables):
     x0, y0up, x1, y1up = element.bbox
     # Change the cordinates because the pdfminer counts from the botton to top of the page
     y0 = page.bbox[3] - y1up
