@@ -6,8 +6,6 @@ TESSDATA_PATH = ''
 
 # Пути для временных файлов
 IMAGES_PATH = "Resources/Images"
-TEMP_PDF_IMAGE = f"{IMAGES_PATH}/cropped_image.pdf"
-TEMP_IMAGE = f"{IMAGES_PATH}/PDF_image.png"
 
 # Название файла
 FILE_NAME = "test"
