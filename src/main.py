@@ -10,7 +10,7 @@ from Tools.config import PDF_PATH, WORD_PATH
 def get_tree(pages):
     for i, page in enumerate(pages):
         print(f'Page #{i}')
-        for j, element in enumerate(page):
+        for j, element in enumerate(page['page_content']):
             print(f'\tElement #{j}')
             
             print(f'\t\t{type(element)}')
@@ -30,6 +30,9 @@ def main():
     )
     parser.add_argument('pdf_path', nargs='?', type=str, default=PDF_PATH, help='The path to the PDF file (optional, default path in "Tools/config.py")')
     parser.add_argument('output_dir', nargs='?', type=str, help='The directory where the Word file will be saved (optional, if not specified, saves to the directory of the first argument)')
+    parser.add_argument('--method', type=str, choices=['stream', 'lattice', 'none'],
+                        default='lattice', help='The method to extract tables from the PDF: stream, lattice, or none (default: lattice)')
+    
     args = parser.parse_args()
 
     pdf_path = args.pdf_path
@@ -48,13 +51,15 @@ def main():
 
     check_file_exists(pdf_path)
 
-    print(f"Выбран файл: '{pdf_path}'\nОбработка файла...")
+    print(f"Selected file: '{pdf_path}'\nProcessing file...")
     
-    # Обработка PDF и сохранение результатов в Word файл
-    content_per_page = extract_all(pdf_path)
+    method = None if args.method == 'none' else args.method
+    
+    # Обработка PDF в зависимости от выбранного метода извлечения таблиц
+    content_per_page = extract_all(pdf_path, method)
     write_to_word(content_per_page, word_path)
+    
     # get_tree(content_per_page)
-    # print(content_per_page[0][7])
 
 if __name__ == "__main__":
     main()

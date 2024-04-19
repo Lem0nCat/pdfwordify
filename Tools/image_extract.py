@@ -1,6 +1,7 @@
 # Для извлечения изображений из PDF
 from PIL import Image
-from pdf2image import convert_from_path
+
+import fitz # PyMuPDF
 
 import pytesseract  # Для выполнения OCR, чтобы извлекать тексты из изображений
 
@@ -39,3 +40,14 @@ def image_to_text(image_path):
     # Извлекаем текст из изображения
     text = pytesseract.image_to_string(img, lang=LANG)
     return text
+
+# Класс для работы Camelot
+class ConversionBackend(object):
+    def convert(self, pdf_path, png_path):
+        # Открываем документ
+        doc = fitz.open(pdf_path) 
+        for page in doc.pages():
+            # Переводим страницу в картинку
+            pix = page.get_pixmap()  
+            # Сохраняем
+            pix.save(png_path)

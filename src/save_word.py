@@ -2,6 +2,8 @@ from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.section import WD_ORIENT
 
+from camelot.core import Table
+
 import os
 
 from Classes.Font import Font
@@ -73,22 +75,25 @@ def write_to_word(content_per_page, word_path):
                         fonts.append(font)
                         
             # Если элемент существует и он является табличным
-            elif element and isinstance(element, TableElement):
-                # Добавляем пустую таблицу 
-                table = doc.add_table(rows=element.num_rows, cols=element.num_cols)
+            elif element and isinstance(element, Table):
+                # Преобразуем данные Camelot в DataFrame
+                table_df = element.df
                 
-                # добавляем данные к существующей таблице
-                for i, row in enumerate(element.data):
+                # Добавляем пустую таблицу в документ
+                table = doc.add_table(rows=len(table_df), cols=len(table_df.columns))
+                
+                # Заполняем таблицу данными
+                for i, row in table_df.iterrows():
                     # Получаем ячейки строки в таблице
                     row_cells = table.rows[i].cells
                     for j, item in enumerate(row):
                         paragraph = row_cells[j].paragraphs[0]
-                        run = paragraph.add_run(item)
+                        run = paragraph.add_run(str(item))
                         
                         # Меняем стили текста
-                        if (len(fonts) > 2):
+                        if len(fonts) > 2:
                             font = Font.get_default_font(fonts)
-                                                  
+                                                
                         run.font.name = font.name
                         run.font.size = Pt(font.size) if font.size <= 10 else Pt(10.0)
                     
