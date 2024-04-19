@@ -78,8 +78,8 @@ def extract_all(path_to_pdf, flavor='lattice'):
 
             if flavor:
                 # Проверка элемента на наличие таблиц
-                if table_index != -1 and is_element_inside_any_table(element, page, page_tables):
-                    table_found_index = find_table_for_element(element, page, page_tables)
+                if table_index != -1 and is_element_inside_any_table(element, page_tables):
+                    table_found_index = find_table_for_element(element, page_tables)
                     if table_found_index == table_index:
                         page_content.append(page_tables[table_index])
                         table_index += 1

@@ -57,6 +57,8 @@ def main():
     
     # Обработка PDF в зависимости от выбранного метода извлечения таблиц
     content_per_page = extract_all(pdf_path, method)
+    
+    print('Saving file...')
     write_to_word(content_per_page, word_path)
     
     # get_tree(content_per_page)

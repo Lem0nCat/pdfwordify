@@ -16,7 +16,7 @@ def text_extraction(element):
         if (i < len(line_texts) - 1):
             next_line = line_texts[i + 1].strip()
             if (next_line and next_line[0].isalpha()):
-                cleaned_texts.append(line)
+                cleaned_texts.append(line + ' ')
             else:
                 cleaned_texts.append(line + '\n')
         else:

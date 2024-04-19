@@ -3,8 +3,6 @@ from collections import defaultdict
 
 import math
 
-from Tools.config import TABLE_SETTINGS
-
 from Tools.image_extract import ConversionBackend
 
 
@@ -17,15 +15,14 @@ def extract_table_camelot(pdf_path, flavor='lattice'):
     # Создаем словарь с аргументами по умолчанию
     args = {
         'backend': ConversionBackend(),
-        'strip_text': '\n',
         'pages': 'all',
         'flavor': flavor
     }
     
-    # Добавляем аргументы, которые зависят от значения flavor
-    if flavor != 'stream':
-        args['line_scale'] = 40
-        args['copy_text'] = ['h']
+    # Добавляем аргументы, которые зависят от значения lattice
+    if flavor == 'lattice':
+        args['line_scale'] = 30
+
 
     # Вызываем функцию с динамически сформированными аргументами
     tables = camelot.read_pdf(pdf_path, **args)
