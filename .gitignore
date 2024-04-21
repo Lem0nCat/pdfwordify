@@ -1,3 +1,12 @@
+# Custom
+Resources/
+
+kernel*
+tesseract_opencl_profile_devices.dat
+
+*.pdf
+*.docx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

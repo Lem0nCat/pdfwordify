@@ -2,12 +2,22 @@ from pdfminer.layout import LTTextContainer, LTChar
 
 from Classes.Font import Font
 
+
 # # # # # # # # # # # # # # # # # # #
 # #   Извлечение текста из PDF  # # #
 # # # # # # # # # # # # # # # # # # #
 
 def text_extraction(element):
-    # Извлекаем текст из элемента, предполагая, что он текстовый контейнер
+    """
+    Извлекает текст из элемента.
+    
+    Args:
+        element (pdfminer.layout.LTTextContainer): Текстовый контейнер страницы PDF документа.
+        
+    Returns:
+        str: Очищенный текст, который был извлечен из контейнера.
+        Classes.Font: Шрифт, который был чаще использован в контейнере. 
+    """
     line_texts = element.get_text().split('\n') if isinstance(element, LTTextContainer) else [""]
     
     # Очищаем текст, удаляя ненужные переносы строк внутри абзацев
