@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pdfwordify"
+version = "0.0.1"
+authors = [{ name="Lem0nCat", email="lemoncat.impt@gmail.com" }]
+description = "Tool for extracting text and tables from PDF files and saving this data in docx format"
+readme = "README.md"
+requires-python = ">=3.10.0"
+license = {file = "LICENSE"}
+keywords = ["word", "docx", "pdf", "convert", "table", "text", "extract"]
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+]
+
+dependencies = [
+    "pdfminer.six>=20231228", 
+    "PyMuPDF>=1.24.2", 
+    "PyPDF2 < 3.0.0", 
+    "python-docx>=1.1.0", 
+    "pillow>=10.3.0", 
+    "pytesseract>=0.3.10", 
+    "multipledispatch>=1.0.0", 
+    "camelot-py[cv]>=0.9.0"
+]
+
+[project.scripts]
+pdfwordify = "pdfwordify.pdf2word:main_cli"
+
+[project.urls]
+Homepage = "https://github.com/Lem0nCat/pdfwordify/"
