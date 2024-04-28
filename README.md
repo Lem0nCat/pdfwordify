@@ -1,103 +1,84 @@
-# PDF Extractor
+# pdfwordify
 
-PDF Extractor — это инструмент для извлечения текста и таблиц из PDF-файлов и сохранения этих данных в формате Microsoft Word. Этот проект предназначен для автоматизации процесса переноса информации из PDF в более удобные для редактирования и обработки форматы.
+**pdfwordify** is a tool for extracting text and tables from PDF files and saving this data in docx(Word) format. This project is designed to automate the process of transferring information from PDF to formats that are easier to edit and process.
 
-## Особенности
+## Features
 
-- Извлечение текста из PDF.
-- Извлечение текста из сканированных страниц в PDF.
-- Извлечение таблиц из PDF.
-- Сохранение извлеченной информации в файл Word.
+- Text extraction from PDF.
+- Extract text from scanned pages to PDF.
+- Extract tables from PDF.
+- Save extracted information to a Word file.
 
-## Требования к системе
 
-Проект разработан на Python и требует следующего:
-- Python 3.12 или выше. (Скорее всего будут работать и другие, не проверял)
-- Библиотеки Python, указанные в файле `requirements.txt`.
-- [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract)
+## How to use
 
-## Установка
+- Install Python 3.10 or newer.
 
-Перед началом работы убедитесь, что у вас установлен Python и pip. Затем выполните следующие шаги:
+- Install [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract)
 
-1. Клонировать репозиторий:
+- Install the library using pip:
    ```bash
-   git clone https://github.com/Lem0nCat/PDF_extractor.git
-   ```
-2. Перейти в директорию с установленным репозиторием.
-3. Установить [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract):
-4. Установить зависимости из файла:
-   ```bash
-   pip install -r requirements.txt
+   pip install pdfwordify
    ```
 
-## Использование
-
-### Важно
-
-Если ваши языковые данные для Tesseract OCR не находятся в папке по умолчанию, то укажите верный путь в файле `Tools/config.py` в переменной `TESSDATA_PATH`. По умолчанию строка пустая, то есть **путь указан по умолчанию**.
-
-### Простое использование
-
-Запустите исполняемый файл с необходимыми аргументами
-
-```bash
-run.py [-h] [--method {stream,lattice,none}] [pdf_path] [output_dir]
-```
-
-#### Аргументы
-
-- `--method`:
-   - **Описание**: Метод извлечения таблиц из файла.
-   - **Обязательный**: Нет
-   - **По умолчанию**: Используется метод `lattice`
-   - **Виды**:
-
-      - `--method lattice` для таблиц, которые имеют четкие границы. 
-
-         <img src="Resources/Images/GitHub Images/image.png" alt="Таблица с четкими границами" width="500"/>
-
-      - `--method stream` для таблиц, которые имеют четких границ. 
-
-         <img src="Resources/Images/GitHub Images/image2.png" alt="Таблица без границ" width="500"/>
-
-      - `--method none` если в документе нет таблиц.
-   - **Пример**: `./run.py --method stream dir/example.pdf`
-
-- `example.pdf`: 
-  - **Описание**: Путь к входному файлу PDF, который нужно преобразовать.
-  - **Обязательный**: Нет
-  - **По умолчанию**: Используется файл из `Tools/config.py`
-  - **Пример**: `./run.py example.pdf`
-
-- `/path/to/output/dir`:
-  - **Описание**: Путь к папке, в которую будет сохранен docx файл.
-  - **Обязательный**: Нет
-  - **По умолчанию**: Используется директория файла PDF
-  - **Пример**: `./run.py example.pdf ~/Desktop`
-
-
-Если не будет указан ни один аргумент, пути к PDF и Word файлу будут взяты из `Tools/config.py`
-
-### Альтернативное использование
-
-1. Переместите нужный PDF файл в папку `Resources/PDF_files`.
-2. Укажите название PDF файла в файле `Tools/config.py` в переменной `FILE_NAME`.
-3. Для запуска программы выполните:
+- Use the command-line interface to convert from PDF to docx.
    ```bash
-   ./run.py
+   pdfwordify example.pdf
    ```
 
-## Конфигурация
+- Or use it with Python.
+   ```python
+   from pdfwordify.converter import convert_to_docx
 
-Для настройки параметров извлечения данных отредактируйте файл `Tools/config.py`.
+   convert_to_docx("example.pdf")
+   ```
 
-## Разработка
+### Arguments
 
-Проект включает следующие основные компоненты:
+This section will provide arguments for using the converter. They are suitable for use within the command line as well as for use within Python.
 
-- **main.py**: Точка входа в программу.
-- **pdf_extract.py**: Модуль для обработки и извлечения данных из PDF.
-- **Папка Classes**: Содержит определения классов для элементов PDF.
-- **Папка Tools**: Вспомогательные инструменты для извлечения текста, изображений и таблиц.
-- **Папка Resources**: Служит папкой для PDF и Word файлов, и изображений
+- `pdf_path`: 
+  - **Description**: The path to the input PDF file to be converted.
+  - **Required**: Yes
+   - **Example**: 
+      - In terminal: `pdfwordify dir/example.pdf`.
+      - In code: `convert_to_docx("dir/example.pdf")`.
+
+- `output_dir`:
+  - **Description**: The path for the docx file. Can be either a folder path, a named path, or a full path specifying the file(docx) extension.
+  - **Required**: No
+  - **Default**: PDF file directory is used
+   - **Example**: 
+      - In terminal: `pdfwordify dir/example.pdf /output/path/`.
+      - In code: `convert_to_docx("dir/example.pdf", "/output/path/")`
+
+- `method`:
+   - **Description**: Method for extracting tables from a file.
+   - **Required**: No
+   - **Default**: `lattice`
+   - **Types**:
+      - `lattice` for tables that have distinct boundaries. 
+
+         <img src="docs/images/lattice_example_table.png" alt="Table with clear boundaries" width="500">
+
+      - `stream` for tables that have clear borders. 
+
+         <img src="docs/images/stream_example_table.png" alt="Table with no borders" width="500">
+
+      - `None` if there are no tables in the document.
+   - **Example**: 
+      - In terminal: `pdfwordify --method stream dir/example.pdf`.
+      - In code: `convert_to_docx("example.pdf", method=None)`.
+
+- `lang`:
+   - **Description**: Language for extracting text from images within a document using Google Tesseract OCR.
+   - **Required**: No
+   - **Default**: `eng`
+   - **Note**: It is possible to combine languages. For example: `rus+eng`
+   - **Example**: 
+      - In terminal: `pdfwordify --lang rus+eng dir/example.pdf`.
+      - In code: `convert_to_docx("example.pdf", lang="rus+eng")`.
+
+## Settings
+
+To further customize the settings, edit the `config.py` file.
