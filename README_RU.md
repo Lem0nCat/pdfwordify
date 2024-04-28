@@ -16,6 +16,8 @@
 
 - Установите [Google tesseract OCR](https://github.com/tesseract-ocr/tesseract)
 
+- Установите [Ghostscript](https://www.ghostscript.com/)
+
 - Установите библиотеку с помощью pip:
    ```bash
    pip install pdfwordify
